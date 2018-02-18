@@ -1,30 +1,30 @@
 module RPShoppingLists {
-	imports
-	{
-		Base
-	}
+    imports
+    {
+        Base
+    }
 
-	item RPShoppingList {
-		Type = Normal,
-		DisplayName = Shopping List,
-		Icon = Paper,
-		Weight = 0.01,
-	}
+    item RPShoppingList {
+        Type = Normal,
+        DisplayName = Shopping List,
+        Icon = Paper,
+        Weight = 0.01,
+    }
 
-	recipe Prepare shopping list {
-		keep Pen/Pencil,
-		SheetPaper,
-		Result:RPShoppingList,
-		Time:10,
-		OnCreate:RP_shoppingListCreate,
-	}
+    recipe Prepare shopping list {
+        keep Pen/Pencil,
+        SheetPaper,
+        Result:RPShoppingList,
+        Time:10,
+        OnCreate:RP_shoppingListCreate,
+    }
 
-	recipe Copy shopping list {
-		keep Pen/Pencil,
-		keep RPShoppingList,
-		SheetPaper,
-		Result:RPShoppingList,
-		Time:10,
-		OnCreate:RP_shoppingListCopy,
-	}
+    recipe Copy shopping list {
+        keep Pen/Pencil,
+        keep RPShoppingList,
+        SheetPaper,
+        Result:RPShoppingList,
+        Time:10,
+        OnCreate:RP_shoppingListCopy,
+    }
 }
