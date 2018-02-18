@@ -5,12 +5,12 @@ RPUIInputOkCancelModal = ISTextBox:derive("RPUIInputOkCancelModal");
 function RPUIInputOkCancelModal:initialise()
     ISCollapsableWindow.initialise(self);
 
-	local fontHgt = getTextManager():getFontFromEnum(UIFont.Small):getLineHeight()
-	local buttonWid1 = getTextManager():MeasureStringX(UIFont.Small, "Ok") + 12
-	local buttonWid2 = getTextManager():MeasureStringX(UIFont.Small, "Cancel") + 12
-	local buttonWid = math.max(math.max(buttonWid1, buttonWid2), 100)
-	local buttonHgt = math.max(fontHgt + 6, 25)
-	local padBottom = 10
+    local fontHgt = getTextManager():getFontFromEnum(UIFont.Small):getLineHeight()
+    local buttonWid1 = getTextManager():MeasureStringX(UIFont.Small, "Ok") + 12
+    local buttonWid2 = getTextManager():MeasureStringX(UIFont.Small, "Cancel") + 12
+    local buttonWid = math.max(math.max(buttonWid1, buttonWid2), 100)
+    local buttonHgt = math.max(fontHgt + 6, 25)
+    local padBottom = 10
 
     self.yes = ISButton:new((self:getWidth() / 2)  - 5 - buttonWid, self:getHeight() - padBottom - buttonHgt, buttonWid, buttonHgt, getText("UI_Ok"), self, RPUIInputOkCancelModal.onClick);
     self.yes.internal = "OK";
