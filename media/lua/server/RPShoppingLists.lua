@@ -2,6 +2,11 @@ function RP_shoppingListCreate(items, shoppingListItem, player)
     local modData = shoppingListItem:getModData();
 
     modData.rpslUniqueID = player:getUsername() .. (ZombRand(1000000) + 1);
+    -- highlighting off by default
+    modData.highlightColorR = 0.0
+    modData.highlightColorG = 0.0
+    modData.highlightColorB = 0.0
+    modData.highlightColorA = 0.0
 
     RPSLOnAddTag(shoppingListItem, player, player:getPlayerNum(), false);
 end

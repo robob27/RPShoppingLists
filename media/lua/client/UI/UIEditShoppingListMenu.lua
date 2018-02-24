@@ -68,7 +68,7 @@ function RPSLOnAddTag(shoppingListItem, player, playerIndex, readOnly)
         ISTimedActionQueue.add(ISInventoryTransferAction:new(player, shoppingListItem, shoppingListItem:getContainer(), player:getInventory()));
     end
     
-    local modal = RPSLUITagModal:new(0, 0, 280, 220, storeNewTag, playerIndex, shoppingListItem, readOnly);
+    local modal = RPSLUITagModal:new(0, 0, 280, 280, storeNewTag, playerIndex, shoppingListItem, readOnly);
     modal.backgroundColor.r =   0;
     modal.backgroundColor.g =   0;
     modal.backgroundColor.b =   0;
