@@ -5,6 +5,17 @@ RPSLUITagModal = ISPanel:derive("RPSLUITagModal");
 local DEFAULT_FONT = UIFont.Small;
 local BUTTON_ADD_ID = 'ADD';
 local BUTTON_DISMISS_ID = 'DISMISS';
+local HIGHLIGHT_COLORS =    {
+                                {r = 0.00, g = 0.00, b = 0.00, a = 0.00},       -- Highlighting off as alpha = 0.0
+                                {r = 1.00, g = 0.00, b = 0.00, a = 1.00},       -- Red
+                                {r = 1.00, g = 0.50, b = 0.00, a = 1.00},       -- Orange
+                                {r = 1.00, g = 1.00, b = 0.00, a = 1.00},       -- Yellow
+                                {r = 0.00, g = 1.00, b = 0.00, a = 1.00},       -- Green
+                                {r = 0.00, g = 1.00, b = 1.00, a = 1.00},       -- Cyan
+                                {r = 0.00, g = 0.50, b = 1.00, a = 1.00},       -- Blue
+                                {r = 0.50, g = 0.25, b = 0.75, a = 1.00},       -- Violet
+                                {r = 1.00, g = 0.00, b = 1.00, a = 1.00},       -- Magenta
+                            };
 
 function RPSLUITagModal:syncModData(newModData)
     local playerObj = self.player and getSpecificPlayer(self.player) or nil
@@ -21,24 +32,20 @@ end
 
 function RPSLUITagModal:initialise()
     ISPanel.initialise(self);
+    local modData = self.shoppingListItem:getModData();
 
     local fontHgt = getTextManager():getFontFromEnum(DEFAULT_FONT):getLineHeight();
     local buttonAddW = getTextManager():MeasureStringX(DEFAULT_FONT, "Add") + 12;
     local buttonDismissW = getTextManager():MeasureStringX(DEFAULT_FONT, "Dismiss") + 12;
-    local textboxHgt = 20;
-    local textboxW = 20;
-
     local buttonHgt = fontHgt + 6
     local padding = 5;
+    local dismissH = self:getHeight() - padding - buttonHgt
+    local colorSelectH = dismissH - padding - buttonHgt
+    local addFieldsH = colorSelectH - padding - buttonHgt
+    local addTextH = addFieldsH - padding - fontHgt       -- Not used, reserved for the title of the two fields
+    local listEndH = addTextH - padding - buttonHgt
 
     local totalWidth = buttonDismissW;
-
-    -- Create button for adding
-    self.add = ISButton:new(240, 155, buttonAddW, buttonHgt, 'Add', self, RPSLUITagModal.onClick);
-    self.add.internal = BUTTON_ADD_ID;
-    self.add:initialise();
-    self.add:instantiate();
-    self.add.borderColor = {r=1, g=1, b=1, a=0.1};
 
     local posX = self:getWidth() * 0.8 - totalWidth * 0.8;
     -- Create button for updating
@@ -49,23 +56,52 @@ function RPSLUITagModal:initialise()
     self.dismiss.borderColor = {r=1, g=1, b=1, a=0.1};
     self:addChild(self.dismiss);
 
+    -- Create buttons for highlighting colour selection
+    local highlightButtonPos = padding
+    self.highlightColorBtn = {}
+    for color = 1, #HIGHLIGHT_COLORS do
+        self.highlightColorBtn[color] = ISButton:new(highlightButtonPos, colorSelectH, buttonHgt, buttonHgt, "", self, RPSLUITagModal.onClickColorSelect);
+        self.highlightColorBtn[color]:initialise();
+        self.highlightColorBtn[color].internal = "HCOLOR";
+        self.highlightColorBtn[color].backgroundColor = {
+            r = HIGHLIGHT_COLORS[color]["r"], 
+            g = HIGHLIGHT_COLORS[color]["g"], 
+            b = HIGHLIGHT_COLORS[color]["b"], 
+            a = HIGHLIGHT_COLORS[color]["a"]};
+        if( (self.highlightColorBtn[color].backgroundColor["r"] == modData.highlightColorR) and
+            (self.highlightColorBtn[color].backgroundColor["g"] == modData.highlightColorG) and
+            (self.highlightColorBtn[color].backgroundColor["b"] == modData.highlightColorB) and
+            (self.highlightColorBtn[color].backgroundColor["a"] == modData.highlightColorA)) then
+            self.highlightColorBtn[color].borderColor = {r=1, g=1, b=1, a=1};
+        else
+            self.highlightColorBtn[color].borderColor = {r=0.2, g=0.2, b=0.2, a=0.4};
+        end
+        self:addChild(self.highlightColorBtn[color]);
+        self.highlightColorBtn[color].enable = true;
+        highlightButtonPos = highlightButtonPos + padding + buttonHgt
+    end
+    -- Create button for adding
+    self.add = ISButton:new(240, addFieldsH, buttonAddW, buttonHgt, 'Add', self, RPSLUITagModal.onClick);
+    self.add.internal = BUTTON_ADD_ID;
+    self.add:initialise();
+    self.add:instantiate();
+    self.add.borderColor = {r=1, g=1, b=1, a=0.1};
+    -- create item name and quantity fields
     self.fontHgt = getTextManager():getFontFromEnum(DEFAULT_FONT):getLineHeight()
     local inset = 2
     local height = inset + self.fontHgt + inset
 
-    self.entryItemName = RPSLISTextEntryWithEnterBox:new(self.defaultEntryText, 10, 155, self:getWidth() - 120, height, self, self.add, self.player, false);
+    self.entryItemName = RPSLISTextEntryWithEnterBox:new(self.defaultEntryText, 10, addFieldsH, self:getWidth() - 120, height, self, self.add, self.player, false);
     self.entryItemName:initialise();
     self.entryItemName:instantiate();
 
-    self.entryItemQuantity = RPSLISTextEntryWithEnterBox:new(self.defaultEntryText, 180, 155, self:getWidth() - 230, height, self, self.add, self.player, false);
+    self.entryItemQuantity = RPSLISTextEntryWithEnterBox:new(self.defaultEntryText, 180, addFieldsH, self:getWidth() - 230, height, self, self.add, self.player, false);
     self.entryItemQuantity:initialise();
     self.entryItemQuantity:instantiate();
 
     posX = posX + buttonAddW + padding;
-    self.tagList = RPSLUIMultiTargetScrollingListBox:new(10, 25, 260, 95, self.player);
+    self.tagList = RPSLUIMultiTargetScrollingListBox:new(10, 25, 260, listEndH, self.player);
     self.tagList:setFont(getTextManager():getFontFromEnum(DEFAULT_FONT));
-
-    local modData = self.shoppingListItem:getModData();
 
     if modData.rpsltags then
         for tag, _ in pairs(modData.rpsltags) do
@@ -83,7 +119,6 @@ function RPSLUITagModal:initialise()
         self:addChild(self.entryItemName);
         self:addChild(self.entryItemQuantity);
         self.tagList:setOnMouseDoubleClick(RPSLUITagModallistItemDoubleClickEvent, self.entryItemName, self.entryItemQuantity);
-        self:addChild(self.entryItemName);
         self.entryItemName:focus();
     end
 end
@@ -112,14 +147,32 @@ function RPSLUITagModal:onClick(button)
     end
 end
 
+function RPSLUITagModal:onClickColorSelect(button)
+    local modData = self.shoppingListItem:getModData();
+    
+    for cbutton = 1, #(self.highlightColorBtn) do
+        self.highlightColorBtn[cbutton].borderColor = {r=0.2, g=0.2, b=0.2, a=0.4};
+    end
+   
+    button.borderColor = {r=1, g=1, b=1, a=1};
+    button.backgroundColor["a"] = 1
+    modData.highlightColorR = button.backgroundColor["r"]
+    modData.highlightColorG = button.backgroundColor["g"]
+    modData.highlightColorB = button.backgroundColor["b"]
+    modData.highlightColorA = button.backgroundColor["a"]   -- only used for highlighting activation
+    
+    self:syncModData(modData)
+end
+
 function RPSLUITagModal:prerender()
+    local fontHgt = getTextManager():getFontFromEnum(DEFAULT_FONT):getLineHeight();
     self:drawRect(0, 0, self.width, self.height, self.backgroundColor.a, self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b);
     self:drawRectBorder(0, 0, self.width, self.height, self.borderColor.a, self.borderColor.r, self.borderColor.g, self.borderColor.b);
     self:drawTextCentre(self.text, self:getWidth() / 2, 5, 1, 1, 1, 1, DEFAULT_FONT);
 
     if not self.readOnly then
-        self:drawText('Item Name:', 10, 135, 1, 1, 1, 1, DEFAULT_FONT);
-        self:drawText('Quantity:', 180, 135, 1, 1, 1, 1, DEFAULT_FONT);
+        self:drawText('Item Name:', self.entryItemName:getX(), self.entryItemName:getY() - fontHgt - 5, 1, 1, 1, 1, DEFAULT_FONT);
+        self:drawText('Quantity:', self.entryItemQuantity:getX(), self.entryItemQuantity:getY() - fontHgt - 5, 1, 1, 1, 1, DEFAULT_FONT);
     end
 end
 
